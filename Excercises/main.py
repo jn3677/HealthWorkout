@@ -1,14 +1,17 @@
 import cv2
-import mediapipe as mp
-import numpy as np
 import win32api
 from Excercises.curls import curl_ups
 from Excercises.push_ups import push_up
 from Excercises.squats import sqaut
 
-from Gestures.tap_scroll import tap_scroll
-from Button.buttons import buttons
+from Excercises.tap_scroll import tap_scroll
+from Excercises.buttons import buttons
+from game import game
+from player import Fighter  # Import your Fighter class from the player module
+import mediapipe as mp
+import pygame
 
+pygame.init()
 
 screen_width = win32api.GetSystemMetrics(0)
 screen_height = win32api.GetSystemMetrics(1)
@@ -100,6 +103,40 @@ def main():
         timer = 20
 
         temp = old_num
+        SCREEN_WIDTH = 1000
+        SCREEN_HEIGHT = 600
+        screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+        font = pygame.font.Font(None, 36)
+
+        clock = pygame.time.Clock()
+
+        font = pygame.font.Font(None, 36)
+        victory_text = font.render("Victory!", True, (0, 0, 255))
+        text_rect = victory_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        # spritesheet = pygame.image.load("lobsterkenney.png")
+
+        victory = False
+
+        pygame.display.set_caption("Brawler")
+        damage_left = 0
+        damage_right = 0
+        YELLOW = (255, 255, 0)
+        RED = (255, 0, 0)
+        WHITE = (0, 0, 0)
+        bg_image = pygame.image.load("backgroundColorGrass.png").convert_alpha()
+
+        fighter_1 = Fighter(70, 310)
+        fighter_2 = Fighter(700, 310)
+
+        fighter_2_health = 200
+        damage_left = 10
+        damage_right = 10
+        paused = False
+        victory_text = None
+
+        victory_start_time = None
+
+        victory = False
         while cap.isOpened():
             ret, image = cap.read()
             image =  cv2.flip(image, 1)
@@ -154,6 +191,9 @@ def main():
                 locked = True
                 print("1")
                 num = temp
+            elif( num == 3):
+                image, fighter_2_health, count_left, count_right , stage_left, stage_right = game(image, pose, fighter_2_health, count_left, count_right, screen, font,
+                                                                        fighter_1, fighter_2,clock, damage_left, damage_right, bg_image, stage_left, stage_right)
 
 
 

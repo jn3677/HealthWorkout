@@ -1,12 +1,9 @@
 #Curl Ups
 import sys
-import fontTools
 import pygame
 import cv2
 import numpy as np
-import math
-import win32api
-from player import Fighter  # Import your Fighter class from the player module
+from Excercises.player import Fighter  # Import your Fighter class from the player module
 import mediapipe as mp
 
 pygame.init()
@@ -31,7 +28,7 @@ damage_right = 0
 YELLOW = (255, 255, 0)
 RED = (255, 0, 0)
 WHITE = (0, 0, 0)
-bg_image = pygame.image.load("backgroundColorGrass.png").convert_alpha()
+bg_image = pygame.image.load("../Excercises/backgroundColorGrass.png").convert_alpha()
 
 def draw_bg():
     scaled_bg = pygame.transform.scale(bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT))

@@ -11,7 +11,7 @@ FPS = 30
 clock = pygame.time.Clock()
 
 #Load the sprite sheet
-sprite_sheet = pygame.image.load("tooth.png")
+sprite_sheet = pygame.image.load("../Excercises/tooth.png")
 
 #Define the dimensions of each frame in the sprite sheet
 FRAME_WIDTH = sprite_sheet.get_width() // 3
