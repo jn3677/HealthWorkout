@@ -93,7 +93,7 @@ def main():
             1: "Lock",
             2: "Push Ups",
             3: "GameMode",
-            4: "Sqauts",
+            4: "Squats",
             5: "Quit"
         }
         button_list = []
