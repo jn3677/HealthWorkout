@@ -68,57 +68,121 @@ def cal_pinch_ratio(indexX, indexY, thumbX, thumbY, wristX,wristY):
 
 def cal_roi_y(value: int, roi_y: int):
     if (value != 0):
-        roi_y += 50 * value * (-1)
-        print(roi_y)
-        if (roi_y > 750):
-            print("reached")
-            roi_y = 750
-        if roi_y < -50:
-            roi_y = -50
-            print("reached")
+        roi_y += 75 * value * (-1)
+   #     print(roi_y)
+        if (roi_y > 850):
+            print("reached bottom")
+            roi_y = 850
+        if roi_y < -550:
+            roi_y = -550
+            print("reached top")
     return roi_y
 
 
 
-def tap(frame_count, roi_x, roi_y, roi_width, roi_height, index_tip,middle_tip, wrist_tip):
-    # index_tip = [
-    #     round(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * screen_width),
-    #     round(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y* screen_height)]
-    # middle_tip = [
-    #     round(hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].x * screen_width),
-    #     round(hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].y * screen_height)]
-    # wrist_tip = [round(hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x * screen_width),
-    #              round(hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y * screen_height)]
+def tap(frame_count, roi_y,button_list, index_tip,middle_tip, wrist_tip, num):
+        # index_tip = [
+        #     round(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * screen_width),
+        #     round(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y* screen_height)]
+        # middle_tip = [
+        #     round(hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].x * screen_width),
+        #     round(hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].y * screen_height)]
+        # wrist_tip = [round(hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x * screen_width),
+        #              round(hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y * screen_height)]
 
-    index_middle_distance = distance(index_tip[0], middle_tip[0], index_tip[1], middle_tip[1])
+        index_middle_distance = distance(index_tip[0], middle_tip[0], index_tip[1], middle_tip[1])
 
-    middle_to_wrist = distance(index_tip[0], wrist_tip[0], index_tip[1], wrist_tip[1])
-    #print(index_tip[0], index_tip[1])
-    ratio = 0
-    if middle_to_wrist != 0:
-        ratio = index_middle_distance / middle_to_wrist
+        middle_to_wrist = distance(index_tip[0], wrist_tip[0], index_tip[1], wrist_tip[1])
+        #print(index_tip[0], index_tip[1])
+        ratio = 0
+        if middle_to_wrist != 0:
+            ratio = index_middle_distance / middle_to_wrist
 
 
-    print(ratio)
-    #circle mesurements
-
-    between_x = (roi_x < index_tip[0]) and (index_tip[0] < (roi_x+roi_width))
-    between_y = (roi_y < index_tip[1]) and (index_tip[1] < (roi_y+ roi_height))
-    if between_x and between_y and (ratio < .15):
-        print(True)
-    # if finger tip is between the x roi_y, roi_height,   and y roi_x, roi_width
-        frame_count += 1
-        if frame_count >= 2:
-            #considered a tap:
-            frame_count = 0
-            print("tapped")
-    return ratio ,(index_tip[0]), (index_tip[1]), int(index_middle_distance/2)
+       # print(ratio)
+        #circle mesurements
+        for i in range(len(button_list)):
+            between_x = (button_list[i][1] < index_tip[0]) and (index_tip[0] < button_list[i][3])
+            between_y = (button_list[i][2] < index_tip[1]) and (index_tip[1] < button_list[i][4])
+            if between_x and between_y and (ratio < .15):
+                print(True)
+                print(button_list[i][0])
+                num = button_list[i][0]
+            # if finger tip is between the x roi_y, roi_height,   and y roi_x, roi_width
+                frame_count += 1
+                if frame_count >= 2:
+                    #considered a tap:
+                    frame_count = 0
+                    print("tapped")
+        return ratio ,(index_tip[0]), (index_tip[1]), int(index_middle_distance/2), num
 
 
 
 
 pass
 
+def tap_scroll(image, hands, prev_y, prev_x,  roi_y, button_list, screen_width, screen_height, width, height, frame_count , scroll_value, scroll_horizontal, num, locked):
+    image.flags.writeable = False
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    results = hands.process(image)
+
+    # draw the hands
+    image.flags.writeable = True
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    value = 0
+
+    if results.multi_hand_landmarks:
+
+        for hand_landmarks in results.multi_hand_landmarks:
+            mp_drawing.draw_landmarks(
+                image,
+                hand_landmarks,
+                mp_hands.HAND_CONNECTIONS,
+                mp_drawing_styles.get_default_hand_landmarks_style(),
+                mp_drawing_styles.get_default_hand_connections_style()
+            )
+
+            index_tip = [
+                round(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * screen_width),
+                round(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * screen_height)]
+            middle_tip = [
+                round(hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].x * screen_width),
+                round(hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].y * screen_height)]
+            wrist_tip = [round(hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x * screen_width),
+                         round(hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y * screen_height)]
+            thumb_tip = [round(hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x * screen_width),
+                         round(hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].y * screen_height)]
+            # pinch start
+            ratio = cal_pinch_ratio(index_tip[0], index_tip[1], thumb_tip[0], thumb_tip[1], wrist_tip[0],
+                                    wrist_tip[1])
+
+
+            if (ratio < .3) and (locked == False):
+                scroll_value, scroll_horizontal, value = scroll(index_tip[0], index_tip[1], prev_y, prev_x,
+                                                                scroll_value, scroll_horizontal)
+
+                prev_x = index_tip[0]
+                prev_y = index_tip[1]
+
+            ## pinch end
+            else:
+                # tap
+                index_tip = [
+                    round(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * width),
+                    round(hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * height)]
+                middle_tip = [
+                    round(hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].x * width),
+                    round(hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].y * height)]
+                wrist_tip = [round(hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x * width),
+                             round(hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y * height)]
+                ratio, center_x, center_y, dist, num = tap(frame_count, roi_y, button_list, index_tip,
+                                                      middle_tip, wrist_tip, num)
+
+                if (ratio < .15):
+                    image = cv2.circle(image, (center_x, center_y), dist, (255, 255, 255), -1)
+
+            roi_y = cal_roi_y(value, roi_y)
+    return image, roi_y, prev_y, prev_x, scroll_value, scroll_horizontal, num
 
 def main():
     with mp_hands.Hands(model_complexity=0,
@@ -157,12 +221,6 @@ def main():
             image.flags.writeable = True
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-            # draw region of interest
-            # plan is to that when a finger is in that region of interest for a certian duration
-            # this is identified as a tap.
-
-            # extracted
-     #       roi = image[roi_y:roi_y + roi_height, roi_x:roi_x + roi_width]
             value = 0
 
             # draw rectangle
